@@ -24,38 +24,42 @@ mkdir -p /var/lib/jenkins
 echo '/dev/data/volume1 /var/lib/jenkins ext4 defaults 0 0' >> /etc/fstab
 mount /var/lib/jenkins
 
-# jenkins & docker repository 
-wget -q -O - https://pkg.jenkins.io/debian/jenkins.io.key | sudo apt-key add -
-echo "deb http://pkg.jenkins.io/debian binary/" >> /etc/apt/sources.list
-apt-get update
-apt-get -y install apt-transport-https ca-certificates curl software-properties-common
-curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
-echo \
-  "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu \
-  $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+# pip & docker repository 
+yum -y update
+amazon-linux-extras install docker -y
+usermod -a -G docker ec2-user
+chkconfig docker on
+curl -L https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m) -o /usr/local/bin/docker-compose
+chmod +x /usr/local/bin/docker-compose
+export PATH=/usr/local/bin:$PATH
+curl -O https://bootstrap.pypa.io/get-pip.py
+python3 get-pip.py
 
 # install dependencies
-apt-get update
-apt-get install docker-ce docker-ce-cli containerd.io -y
-apt-get install -y python3.8 openjdk-8-jre jq
+yum install jq unzip -y
 
 # install jenkins
-apt-get install -y jenkins unzip
-
-# install pip
-wget -q https://bootstrap.pypa.io/get-pip.py
-python3.8 get-pip.py
-pip3 install docker-compose
+wget -O /etc/yum.repos.d/jenkins.repo \
+    https://pkg.jenkins.io/redhat-stable/jenkins.repo
+rpm --import https://pkg.jenkins.io/redhat-stable/jenkins.io.key
+yum upgrade
+amazon-linux-extras install java-openjdk11 -y
+yum install jenkins -y
 usermod -aG docker jenkins
 echo "jenkins ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
 chmod 666 /var/run/docker.sock
 
 # install awscli
 pip install awscli
+aws --version
 
 #install helm and K8s
 curl -sSL https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash
-snap install kubectl --classic
+curl -o kubectl https://s3.us-west-2.amazonaws.com/amazon-eks/1.22.6/2022-03-09/bin/linux/amd64/kubectl
+chmod +x ./kubectl
+mkdir -p $HOME/bin && cp ./kubectl $HOME/bin/kubectl && export PATH=$PATH:$HOME/bin
+echo 'export PATH=$PATH:$HOME/bin' >> ~/.bashrc
+kubectl version --short --client
 
 # install terraform
 wget -q https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip \
@@ -68,5 +72,4 @@ wget -q https://releases.hashicorp.com/packer/1.7.0/packer_1.7.0_linux_amd64.zip
 unzip packer_1.7.0_linux_amd64.zip
 
 # clean up
-apt-get clean
 rm packer_1.7.0_linux_amd64.zip

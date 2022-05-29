@@ -4,7 +4,7 @@ pipeline {
 		AWS_DEFAULT_REGION = "${params.AWS_REGION}"
 		PROFILE = "${params.PROFILE}"
 		ACTION = "${params.ACTION}"
-		PROJECT_DIR = "infra/eks"
+		PROJECT_DIR = "eks"
     }
 	options {
         buildDiscarder(logRotator(numToKeepStr: '30'))
@@ -173,10 +173,10 @@ pipeline {
 
 def tfCmd(String command, String options = '') {
 	ACCESS = "export AWS_PROFILE=${PROFILE}"
-	sh ("cd $WORKSPACE/infra/eks && ${ACCESS} && terraform init -reconfigure")
-	sh ("cd $WORKSPACE/infra/eks && terraform workspace select ${ENV_NAME} || terraform workspace new ${ENV_NAME}")
+	sh ("cd $WORKSPACE/eks && ${ACCESS} && terraform init -reconfigure")
+	sh ("cd $WORKSPACE/eks && terraform workspace select ${ENV_NAME} || terraform workspace new ${ENV_NAME}")
 	sh ("echo ${command} ${options}") 
-    sh ("cd $WORKSPACE/infra/eks && ${ACCESS} && terraform init && terraform ${command} ${options} && terraform show -no-color > show-${ENV_NAME}.txt")
+    sh ("cd $WORKSPACE/eks && ${ACCESS} && terraform init && terraform ${command} ${options} && terraform show -no-color > show-${ENV_NAME}.txt")
 }
 
 def cleanUp() {

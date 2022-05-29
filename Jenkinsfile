@@ -36,7 +36,11 @@ pipeline {
 							{
 							try {
                                 cleanUp()
+				checkout scm
+						
                                 sh"""
+				    pwd
+				    ls -l
                                     /usr/local/bin/aws configure --profile ${PROFILE} set aws_access_key_id ${aws_access_id}
                                     /usr/local/bin/aws configure --profile ${PROFILE} set aws_secret_access_key ${aws_secret_key}
                                     /usr/local/bin/aws configure --profile ${PROFILE} set region ${AWS_REGION}

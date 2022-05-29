@@ -12,7 +12,7 @@ variable "AMIS" {
   default = {
     us-east-1 = "ami-0f9cf087c1f27d9b1"
     us-west-2 = "ami-0653e888ec96eab9b"
-    eu-west-1 = "ami-08ca3fed11864d6bb"
+    eu-west-1 = "ami-0c1bc246476a5572b"
   }
 }
 variable "INSTANCE_DEVICE_NAME" {

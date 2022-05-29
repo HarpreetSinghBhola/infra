@@ -2,13 +2,9 @@ module "eks" {
   source          = "terraform-aws-modules/eks/aws"
   version         = "~> 18.0"
   cluster_name    = local.cluster_name
-<<<<<<< HEAD
+
   cluster_version = "1.22"
   subnet_ids      = module.vpc.private_subnets
-=======
-  cluster_version = "1.20"
-  subnets         = module.vpc.private_subnets
->>>>>>> 89f16296dc3bd68bc3a042085ca9190572365616
 
   cluster_endpoint_private_access  = true
 

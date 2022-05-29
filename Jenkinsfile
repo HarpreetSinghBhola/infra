@@ -143,10 +143,12 @@ pipeline {
 				dir("${PROJECT_DIR}") {
 					script {
                             try {
-                                sh '''
-								echo Deploying Metric server..
-								kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
-								'''
+                                sh """
+				cluster_id="\$(terraform output -raw cluster_id)"
+				aws eks update-kubeconfig --region ${AWS_REGION} --name ${cluster_id}
+				echo Deploying Metric server..
+				kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
+				"""
                             } catch (ex) {
                 			currentBuild.result = "FAILED"
 							sh "exit 1"
